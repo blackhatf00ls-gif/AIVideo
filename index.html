@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>iOS Web Livestream</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="nav">
+    <div class="nav__brand">
+      <span class="nav__dot"></span>
+      <span class="nav__name">Lux Live</span>
+    </div>
+    <div class="nav__actions">
+      <span class="pill pill--frost">Ultra HD ready</span>
+      <button class="primary primary--outline">Handleiding</button>
+    </div>
+  </header>
+
+  <header class="hero">
+    <div class="hero__text">
+      <p class="eyebrow">Livestream</p>
+      <h1>Ga live vanaf je iPhone</h1>
+      <p class="lede">
+        Start een directe WebRTC-livestream die werkt in Safari op iOS. Deel je cameraperspectief, schakel van lens, en houd de stream stabiel voor je kijkers.
+      </p>
+      <div class="hero__highlights">
+        <div class="highlight">
+          <span class="highlight__value">Dolby-achtige audio</span>
+          <span class="highlight__label">met automatisch gainbeheer</span>
+        </div>
+        <div class="highlight">
+          <span class="highlight__value">Cinematic skin</span>
+          <span class="highlight__label">glasachtige panelen en gloed</span>
+        </div>
+        <div class="highlight">
+          <span class="highlight__value">Edge-ready</span>
+          <span class="highlight__label">50ms low-latency preview</span>
+        </div>
+      </div>
+    </div>
+    <div class="hero__badge">iOS web ready</div>
+  </header>
+
+  <main class="grid">
+    <section class="card">
+      <div class="card__header">
+        <div>
+          <p class="eyebrow">Zender</p>
+          <h2>Uw camera</h2>
+        </div>
+        <span class="status" id="broadcastStatus">Offline</span>
+      </div>
+      <div class="video-shell">
+        <video id="broadcaster" playsinline muted></video>
+        <div class="video-shell__glow"></div>
+        <div class="video-shell__overlay">
+          <span class="pulse"></span>
+          <span class="video-shell__label">Studio feed</span>
+        </div>
+      </div>
+      <div class="controls">
+        <button id="startButton" class="primary">Start livestream</button>
+        <button id="stopButton" class="ghost" disabled>Stop</button>
+        <button id="switchCamera" class="ghost" disabled>Schakel camera</button>
+        <button id="toggleMic" class="ghost" disabled>Microfoon uit</button>
+        <button id="toggleVideo" class="ghost" disabled>Camera uit</button>
+      </div>
+      <p class="hint">
+        iOS Safari vereist een gebruikersactie om camera en microfoon te openen. De video is standaard gedempt om automatische afspelen toe te staan.
+      </p>
+    </section>
+
+    <section class="card">
+      <div class="card__header">
+        <div>
+          <p class="eyebrow">Publiek</p>
+          <h2>Viewer preview</h2>
+        </div>
+        <span class="status status--ghost" id="viewerStatus">Wacht op stream</span>
+      </div>
+      <div class="video-shell">
+        <video id="viewer" playsinline controls></video>
+        <div class="video-shell__overlay video-shell__overlay--right">
+          <span class="video-shell__label">Publieks preview</span>
+        </div>
+      </div>
+      <div class="card__body">
+        <p>
+          De viewer gebruikt een in-memory WebRTC-verbinding zodat je direct kunt testen zonder backend-signalling. Integreer eigen signalling om echte kijkers te verbinden.
+        </p>
+        <ul class="pill-list">
+          <li class="pill">WebRTC</li>
+          <li class="pill">Safari compatible</li>
+          <li class="pill">Front/Back switch</li>
+          <li class="pill">Mute/Unmute</li>
+        </ul>
+      </div>
+    </section>
+  </main>
+
+  <section class="card card--full card--bytedance">
+    <div class="card__header">
+      <div>
+        <p class="eyebrow">ByteDance Live</p>
+        <h2>Open API integratie</h2>
+      </div>
+      <span class="badge">Douyin / TikTok</span>
+    </div>
+
+    <div class="bytedance-grid">
+      <div class="panel">
+        <div class="panel__header">
+          <h3>Push ingest</h3>
+          <span id="ingestStatus" class="chip">Niet opgehaald</span>
+        </div>
+        <p class="muted">
+          Vraag een push-URL en streamkey op via de ByteDance Live Open API. Een access-token is vereist; een mislukte aanvraag gebruikt mock data zodat je de flow kunt testen.
+        </p>
+        <label class="field">
+          <span>Access token</span>
+          <input id="bytedanceToken" type="text" placeholder="plak hier je open_api_access_token" autocomplete="off" />
+        </label>
+        <div class="controls controls--inline">
+          <button id="bytedanceSync" class="primary">Haal ingest op</button>
+          <button id="refreshLives" class="ghost">Ververs lives</button>
+        </div>
+        <dl class="ingest">
+          <div>
+            <dt>Push URL</dt>
+            <dd id="ingestUrl">-</dd>
+          </div>
+          <div>
+            <dt>Stream key</dt>
+            <dd id="streamKey">-</dd>
+          </div>
+          <div>
+            <dt>Room ID</dt>
+            <dd id="roomId">-</dd>
+          </div>
+        </dl>
+      </div>
+
+      <div class="panel">
+        <div class="panel__header">
+          <h3>Actieve ByteDance livestreams</h3>
+          <span id="liveListStatus" class="chip chip--ghost">Geen verzoek</span>
+        </div>
+        <p class="muted">
+          De lijst haalt de huidige livestreams op via de ByteDance API (Douyin/TikTok). Zonder geldige token tonen we veilige demo-resultaten.
+        </p>
+        <ul id="liveList" class="live-list">
+          <li class="live-list__empty">Nog geen data opgehaald.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="card card--full">
+    <div class="card__header">
+      <h2>Hoe het werkt</h2>
+    </div>
+    <div class="steps">
+      <article class="step">
+        <span class="step__number">1</span>
+        <div>
+          <h3>Vraag media aan</h3>
+          <p>Wanneer je op Start tikt vraagt de app om camera- en microfoonrechten via <code>getUserMedia</code> met Safari-vriendelijke opties.</p>
+        </div>
+      </article>
+      <article class="step">
+        <span class="step__number">2</span>
+        <div>
+          <h3>Verbind de peer</h3>
+          <p>De stream wordt toegevoegd aan een <code>RTCPeerConnection</code>. Signalling vindt lokaal plaats zodat de viewer direct beeld ontvangt.</p>
+        </div>
+      </article>
+      <article class="step">
+        <span class="step__number">3</span>
+        <div>
+          <h3>Optimaliseer voor iOS</h3>
+          <p>Video-elementen gebruiken <code>playsinline</code> en er is een fallbackmelding wanneer permissies of WebRTC niet beschikbaar zijn.</p>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <template id="toastTemplate">
+    <div class="toast" role="status"></div>
+  </template>
+
+  <script src="app.js"></script>
+</body>
+</html>
